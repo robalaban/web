@@ -6,15 +6,12 @@ interface Props {
         title: string;
         publishDate: string;
         status?: "wip" | "finished" | "start";
+        readingTime: number;
     };
-    rawContent: () => string;
 }
 
-const { frontmatter, rawContent } = Astro.props;
-
-// Reading time
-const words = rawContent().split(/\s+/).filter(Boolean).length;
-const readingTime = Math.max(1, Math.ceil(words / 200));
+const { frontmatter } = Astro.props;
+const readingTime = frontmatter.readingTime;
 
 ---
 

@@ -29,7 +29,6 @@ Uses Nix flakes for reproducible dev environment (Node.js 22 + pnpm). Enter with
 - `src/layouts/` — `Layout.astro` is the base layout; `BlogPost.astro` extends it for post pages.
 - `src/components/` — Shared Astro components (`Header`, `Footer`).
 - `src/data/current.ts` — Centralized "currently reading/learning" data imported by homepage and about page.
-- `src/utils/posts.ts` — Post collection helper using `import.meta.glob` to load and sort Markdown posts.
 - `src/styles/global.css` — Tailwind v4 theme definition (custom color scales, font families, spacing tokens) and `.prose` typography styles.
 
 **Styling**: Tailwind CSS v4 via Vite plugin. Three font families: Lora (body/sans), Sora (headings), Fira Code (mono). Grayscale primary palette with red secondary accent.

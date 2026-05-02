@@ -1,0 +1,44 @@
+---
+type Type = 'note' | 'tip' | 'warning';
+
+interface Props {
+    type?: Type;
+    title?: string;
+}
+
+const { type = 'note', title } = Astro.props;
+
+const styles: Record<Type, { container: string; label: string; defaultTitle: string; icon: string }> = {
+    note: {
+        container: 'border-primary-300 bg-primary-50',
+        label: 'text-primary-700',
+        defaultTitle: 'Note',
+        icon: 'ri-information-line',
+    },
+    tip: {
+        container: 'border-secondary-300 bg-secondary-50',
+        label: 'text-secondary-700',
+        defaultTitle: 'Tip',
+        icon: 'ri-lightbulb-line',
+    },
+    warning: {
+        container: 'border-secondary-400 bg-secondary-100',
+        label: 'text-secondary-800',
+        defaultTitle: 'Warning',
+        icon: 'ri-alert-line',
+    },
+};
+
+const s = styles[type];
+const heading = title ?? s.defaultTitle;
+---
+
+<aside class:list={['not-prose my-6 border-l-2 px-4 py-3 rounded-sm', s.container]}>
+    <div class:list={['flex items-center gap-2 font-mono text-xs tracking-wide uppercase mb-2', s.label]}>
+        <i class={s.icon}></i>
+        <span>{heading}</span>
+    </div>
+    <div class="text-sm text-primary-800 leading-relaxed">
+        <slot />
+    </div>
+</aside>

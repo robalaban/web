@@ -1,0 +1,257 @@
+---
+layout: ../../layouts/BlogPost.astro
+title: "How I use Nix to speed-up my development workflow"
+description: "Deterministic package manager, reproducible development environments and other benefits of using Nix"
+publishDate: "May 2, 2026"
+topic: "workflow"
+status: "start"
+---
+import Callout from '../../components/Callout.astro';
+
+<Callout type="note" title="How to get the most out of this article">
+  This is a walkthrough of how I personally discovered and use Nix. It is by no means a step-by-step tutorial — you'll get the most value if you read it alongside your LLM of choice and ask it to dive deeper where my explanation falls short. My goal is to introduce Nix to your toolkit.
+</Callout>
+
+Nix. A language, package manager, build tool, and an operating system. Reasoning about it can be tricky, but it's a powerful tool to have in your toolbox, and it's been at the core of my workflow for about two years now.
+
+To preface what follows: I am not an expert and have only used a subset of the features of Nix. My primary goal started with wanting to version control my laptop config, to minimise the time it would take to get back online if something were to happen to my laptop. This journey led me to discover nix-flakes and how they could help quickstart development projects.
+
+The natural question is: why not just use dotfiles / Homebrew? Although a good start, there are some issues with this approach. Well, various issues. I'll try to enumerate them in no particular order.
+
+* The non-deterministic model of Homebrew. If I install a package today, and then try to install it again in 6 months, I might get a different version of the package, which could potentially break my workflow.
+
+* Homebrew pins packages to the latest versions. This means that if I want to use a specific version of a package, I have to manually install it and then pin it, which is a bit of a hassle.
+
+* Dotfiles are not portable enough. I run a few home servers on Linux, and I would have to maintain a separate set of dotfiles for my laptop (macOS) and my servers (Linux), which is not ideal.
+
+I started looking for alternatives. My main requirements were:
+
+* Reproducibility. I want to be able to reproduce my development environment on any machine, at any time.
+* Portability. I want to be able to use the same configuration on my laptop and my servers.
+
+This is how I stumbled upon [Nix](https://edolstra.github.io/pubs/phd-thesis.pdf) and it opened my eyes to what a purpose-built language for configuration could be. Not only can I control the applications and their versions that I'm installing, I can also control their configuration. This means that I can have a single source of truth for my development environment, and I can easily reproduce it on any machine.
+
+## Installing Nix
+
+Installing Nix is not as straightforward as I might like, but the instructions on the [official website](https://nixos.org/download.html) are good enough. A few caveats to be aware of:
+
+* Nix is not available on Windows, so if you're a Windows user, you're out of luck. However, you can use WSL to run Nix on Windows.
+
+* Nix runs natively on macOS, but managing system-level settings the way you would on NixOS requires the [nix-darwin](https://github.com/nix-darwin/nix-darwin) project.
+
+* Nix likes to take over your system. I have been running Nix on my laptop for the past two years without any issues, so it's not a deal breaker. However, it's something to be aware of before you install Nix, especially if you're running it in an enterprise environment where you might not have full control over your machine.
+
+* Nix uses a lot of disk space. Nix stores all of its packages in a single directory, which can take up a lot of disk space. However, you can use the `nix-collect-garbage` command to clean up old packages and free up disk space.
+
+## Nix on macOS
+
+My daily driver is a MacBook Pro, so from the start I wanted to get Nix running on macOS — and this is where nix-darwin comes in. nix-darwin lets you manage your macOS system configuration with Nix, giving you a single source of truth that you can reproduce on any machine.
+
+### Nix-Darwin & Home Manager
+
+The easiest way to think about this: nix-darwin manages system-level programs and configuration, while home-manager manages user configuration.
+
+Example nix-darwin configuration:
+
+```nix
+# darwin.nix
+
+{ pkgs, ... }: {
+  # Enable flakes and optimize storage to save space
+  nix.settings = {
+    experimental-features = [ "nix-command" "flakes" ];
+    auto-optimise-store = true;
+  };
+
+  # User Configuration
+  users.users.robert = {
+    name = "robert";
+    home = "/Users/robert";
+  };
+
+  # 3. System Packages
+  # Essential command line tools
+  environment.systemPackages = with pkgs; [
+    git
+    neovim
+    tmux
+    ## Add more packages as needed
+  ];
+
+  # Create /etc/zshrc that loads the nix-darwin environment
+  programs.zsh.enable = true;
+
+  # MacOS System Preferences
+  system.defaults = {
+    # Keyboard settings
+    NSGlobalDomain.KeyRepeat = 2;
+    NSGlobalDomain.InitialKeyRepeat = 15;
+
+    # Visual settings (Dock, Finder)
+    dock.autohide = true;
+    dock.show-recents = false;
+    finder.AppleShowAllFiles = true;
+  };
+
+  # Keyboard remapping (CapsLock -> Escape)
+  system.keyboard.enableKeyMapping = true;
+  system.keyboard.remapCapsLockToEscape = true;
+
+  # Use TouchID for `sudo` commands
+  security.pam.services.sudo_local.touchIdAuth = true;
+}
+
+```
+
+As we can see, there are already a lot of things going on in this configuration: from installing CLI tools, to remapping keys, to enabling Touch ID for sudo, and more. Although a small example of why Nix is so powerful, it's just the beginning.
+
+```nix
+# home-manager.nix
+
+{ config, pkgs, ... }:
+
+{
+  # Home Manager needs a bit of information about you and the paths it should manage.
+  home.username = "robert";
+  home.homeDirectory = "/home/robert";
+
+  home.stateVersion = "24.05"; # Please update to your actual install version
+
+  # 1. Install Packages "brew layer"
+  # These are tools that don't need complex configuration, just the binary.
+  home.packages = with pkgs; [
+    # Modern CLI replacements
+    eza      # Better 'ls'
+    ripgrep  # Better 'grep'
+    fd       # Better 'find'
+    jq       # JSON processor
+  ];
+
+  # Configure Programs (The "Dotfiles" layer)
+  programs = {
+    home-manager.enable = true;
+
+    # Git: Setup user identity and aliases
+    git = {
+      enable = true;
+      userName = "robalaban";
+      userEmail = "<you@example.com>";
+      extraConfig = {
+        init.defaultBranch = "main";
+        pull.rebase = true;
+      };
+    };
+
+    # Starship: A cross-shell prompt
+    starship = {
+      enable = true;
+      settings = {
+        add_newline = false;
+        aws.disabled = true;
+      };
+    };
+
+    # FZF: Fuzzy finder
+    fzf = {
+      enable = true;
+      enableZshIntegration = true;
+    };
+  };
+}
+```
+
+Now things are a little clearer: `darwin.nix` installs zsh / tmux, and `home-manager.nix` installs the packages that I want to use and configures them.
+
+## Nix Flakes
+
+A modern way to manage your Nix configuration is to use Nix Flakes. Nix Flakes are a feature in Nix that lets you manage your configuration using a single file. This file is called `flake.nix`, and it contains all of the information about your Nix configuration, including the packages you want to install, the configuration for those packages, and any other information that you want to include.
+
+The benefits of using flakes are that alongside the `flake.nix` file, you also get a `flake.lock` file which contains the exact versions of the packages that you're using. This means that you can easily reproduce your Nix configuration on any machine, at any time, and you can be sure that you're using the same versions of the packages.
+
+Discovering flakes was the "aha" moment for me. Apart from making me realise that I had been using Nix in a suboptimal way before, I quickly realised that with flakes I could package not only my laptop configuration, but also the configuration for the various projects that I was working on. This meant that I could have a single source of truth for my entire development environment, and I could easily reproduce it on any machine.
+
+### The anatomy of a flake
+
+```sh
+{
+  description = "Python development environment with uv package manager";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
+  };
+
+  outputs = inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+
+      perSystem = { pkgs, ... }:
+        let
+          # Use the latest stable Python version
+          python = pkgs.python312;
+
+          # Create a Python environment with common packages
+          pythonEnv = python.withPackages (ps: with ps; [
+            # Data science and scientific computing
+            numpy
+            pandas
+            matplotlib
+
+            # Web development
+            requests
+            flask
+            fastapi
+
+            # Development tools
+            pytest
+            black
+            isort
+            mypy
+          ]);
+        in
+        {
+          packages = {
+            default = pythonEnv;
+          };
+
+          devShells = {
+            default = pkgs.mkShell {
+              packages = with pkgs; [
+                pythonEnv
+
+                # Modern Python package manager and tools
+                uv # Fast Python package installer
+                ruff # Fast Python linter
+                pyright # Python language server
+              ];
+            };
+          };
+
+          apps = {
+            default = {
+              program = "${pythonEnv}/bin/python";
+              type = "app";
+            };
+          };
+        };
+    };
+}
+```
+
+This flake defines a portable Python development setup that I can enter or run consistently across Linux and macOS systems.
+
+For the first time, I can install specific versions of Python and its packages, and be confident that the same environment will be reproduced on any machine. I can add any other required tools to the `devShells` section, and they will be available whenever I enter the development shell. As someone who juggles a few projects at the same time, in different languages, with different dependencies and tools, this workflow has been very ergonomic.
+
+## Conclusion
+
+Flakes are where my discovery of Nix paused for now, and they have been a game changer for my development workflow. They have not only helped me with my primary goal of managing my laptop configuration, but also with managing the configuration for my various projects.
+
+To see how I use flakes to manage my laptop configuration, check out my GitHub repository: [config](https://github.com/robalaban/config). If you want to see how I use flakes to manage my project configurations, check out my GitHub repository: [frosted-flakes](https://github.com/robalaban/frosted-flakes).
+
+## Resources
+
+* [Nix Pills](https://nix.dev/tutorials/nix-pills) - A great tutorial series to get started with Nix.
+* [Zero-to-Nix](https://zero-to-nix.com/start/install/) - Another great tutorial series to get started with Nix.

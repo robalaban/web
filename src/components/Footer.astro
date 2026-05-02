@@ -1,8 +1,11 @@
 ---
-import { getLatestPostDate } from '../utils/posts.js';
-
-const currentYear = new Date().getFullYear();
-const lastUpdated = await getLatestPostDate();
+const now = new Date();
+const currentYear = now.getFullYear();
+const lastUpdated = now.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+});
 ---
 
 <footer class="sticky top-[100vh] py-4">

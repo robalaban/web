@@ -1,6 +1,4 @@
 ---
-import { getLatestPostDate } from '../utils/posts.js';
-
 const { pathname } = Astro.url;
 
 const menuItems = [
@@ -14,8 +12,6 @@ const isActive = (href: string) => {
     }
     return pathname.startsWith(href);
 };
-
-const lastUpdated = await getLatestPostDate();
 ---
 
 <header class="w-full">
@@ -47,20 +43,22 @@ const lastUpdated = await getLatestPostDate();
 
             <!-- Right side - Last updated -->
             <div class="flex items-center space-x-2 text-sm font-mono tracking-wide">
-                <a href="https://bsky.app/profile/robertbalaban.bsky.social"
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   class="text-primary-950 hover:text-secondary-500 transition-colors">
-                    BLUESKY
-                </a>
-                <span class="text-secondary-400 separator"></span>
-                <a href="https://github.com/robertbalaban"
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   class="text-primary-950 hover:text-secondary-500 transition-colors">
-                    GITHUB
-                </a>
-                <span class="text-secondary-400 separator"></span>
+                <div class="hidden sm:flex items-center space-x-2">
+                    <a href="https://bsky.app/profile/robertbalaban.bsky.social"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="text-primary-950 hover:text-secondary-500 transition-colors">
+                        BLUESKY
+                    </a>
+                    <span class="text-secondary-400 separator"></span>
+                    <a href="https://github.com/robertbalaban"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="text-primary-950 hover:text-secondary-500 transition-colors">
+                        GITHUB
+                    </a>
+                    <span class="text-secondary-400 separator"></span>
+                </div>
                 <div class="relative"
                      x-data="{
                          open: false,
