@@ -1,0 +1,138 @@
+---
+import { getLatestPostDate } from '../utils/posts.js';
+
+const { pathname } = Astro.url;
+
+const menuItems = [
+    { label: 'HOME', href: '/' },
+    { label: 'PROJECTS', href: '/projects' },
+];
+
+const isActive = (href: string) => {
+    if (href === '/') {
+        return pathname === href;
+    }
+    return pathname.startsWith(href);
+};
+
+const lastUpdated = await getLatestPostDate();
+---
+
+<header class="w-full">
+    <div class="my-4 mx-4">
+        <div class="flex items-center justify-between">
+            <!-- Left side with circle -->
+            <div class="flex items-center">
+                <div class="w-4 h-4 rounded-full bg-secondary-500"></div>
+            </div>
+
+            <!-- Center - Navigation -->
+            <nav class="flex-1 mx-6">
+                <ul class="flex items-center space-x-8 font-mono">
+                    {menuItems.map(item => (
+                        <li>
+                            <a href={item.href} 
+                               class:list={[
+                                   "text-sm tracking-wide transition-colors",
+                                   isActive(item.href) 
+                                     ? "text-secondary-500" 
+                                     : "text-primary-950 hover:text-secondary-500"
+                               ]}>
+                                {item.label}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </nav>
+
+            <!-- Right side - Last updated -->
+            <div class="flex items-center space-x-2 text-sm font-mono tracking-wide">
+                <a href="https://bsky.app/profile/robertbalaban.bsky.social"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="text-primary-950 hover:text-secondary-500 transition-colors">
+                    BLUESKY
+                </a>
+                <span class="text-secondary-400 separator"></span>
+                <a href="https://github.com/robertbalaban"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="text-primary-950 hover:text-secondary-500 transition-colors">
+                    GITHUB
+                </a>
+                <span class="text-secondary-400 separator"></span>
+                <div class="relative"
+                     x-data="{
+                         open: false,
+                         theme: localStorage.getItem('theme') || 'system',
+                         get icon() {
+                             if (this.theme === 'dark') return 'ri-moon-line';
+                             if (this.theme === 'light') return 'ri-sun-line';
+                             return 'ri-computer-line';
+                         },
+                         apply(t) {
+                             this.theme = t;
+                             if (t === 'system') {
+                                 localStorage.removeItem('theme');
+                                 const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                                 document.documentElement.classList.toggle('dark', isDark);
+                             } else {
+                                 localStorage.setItem('theme', t);
+                                 document.documentElement.classList.toggle('dark', t === 'dark');
+                             }
+                             this.open = false;
+                         },
+                         init() {
+                             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                                 if (!localStorage.getItem('theme')) {
+                                     document.documentElement.classList.toggle('dark', e.matches);
+                                 }
+                             });
+                         }
+                     }"
+                     @click.outside="open = false"
+                     @keydown.escape.window="open = false"
+                >
+                    <button
+                        type="button"
+                        aria-label="Toggle theme"
+                        class="text-primary-950 hover:text-secondary-500 transition-colors cursor-pointer"
+                        @click="open = !open"
+                    >
+                        <i :class="icon"></i>
+                    </button>
+                    <div
+                        x-show="open"
+                        x-transition.opacity.duration.150ms
+                        class="absolute right-0 mt-2 w-40 bg-neutral-50 border border-primary-200 rounded shadow-soft-md z-50"
+                    >
+                        <button
+                            type="button"
+                            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-primary-800 hover:bg-primary-50 hover:text-secondary-500 transition-colors cursor-pointer"
+                            :class="theme === 'light' && 'text-secondary-500'"
+                            @click="apply('light')"
+                        >
+                            <i class="ri-sun-line"></i> Light
+                        </button>
+                        <button
+                            type="button"
+                            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-primary-800 hover:bg-primary-50 hover:text-secondary-500 transition-colors cursor-pointer"
+                            :class="theme === 'dark' && 'text-secondary-500'"
+                            @click="apply('dark')"
+                        >
+                            <i class="ri-moon-line"></i> Dark
+                        </button>
+                        <button
+                            type="button"
+                            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-primary-800 hover:bg-primary-50 hover:text-secondary-500 transition-colors cursor-pointer"
+                            :class="theme === 'system' && 'text-secondary-500'"
+                            @click="apply('system')"
+                        >
+                            <i class="ri-computer-line"></i> System
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

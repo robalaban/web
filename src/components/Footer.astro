@@ -1,0 +1,15 @@
+---
+import { getLatestPostDate } from '../utils/posts.js';
+
+const currentYear = new Date().getFullYear();
+const lastUpdated = await getLatestPostDate();
+---
+
+<footer class="sticky top-[100vh] py-4">
+    <div class="max-w-[900px] mx-auto px-4">
+        <div class="flex items-center justify-between font-mono text-xs text-primary-400">
+            <span>&copy; {currentYear} Robert Balaban</span>
+            <span>updated {lastUpdated}</span>
+        </div>
+    </div>
+</footer>

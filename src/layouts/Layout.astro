@@ -1,0 +1,72 @@
+---
+import '../styles/global.css';
+
+import '@fontsource-variable/lora';
+import '@fontsource-variable/sora';
+import '@fontsource-variable/fira-code';
+import 'remixicon/fonts/remixicon.css';
+
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+
+interface Props {
+    title?: string;
+    description?: string;
+    image?: string;
+}
+
+const { 
+    title = "Robert Balaban",
+    description = "Personal blog and digital garden where I share my thoughts on software engineering, data engineering, and technology.",
+    image = "/og-default.jpg" // You'll need to add a default OG image
+} = Astro.props;
+
+const canonicalURL = Astro.site 
+    ? new URL(Astro.url.pathname, Astro.site)
+    : Astro.url.pathname;
+---
+
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<script is:inline>
+			(function(){
+				var t = localStorage.getItem('theme');
+				var d = t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches);
+				if (d) document.documentElement.classList.add('dark');
+			})();
+		</script>
+		
+		<!-- Primary Meta Tags -->
+		<title>{title}</title>
+		<meta name="title" content={title} />
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonicalURL} />
+		
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={image} />
+		
+	</head>
+	<body class="min-h-screen flex flex-col bg-neutral-50 text-primary-950" x-data>
+		<Header />
+		<main class="w-full max-w-[900px] min-w-[320px] mx-auto my-16 px-4">
+			<slot />
+		</main>
+		<Footer />
+		<script>
+			import Alpine from 'alpinejs';
+			import collapse from '@alpinejs/collapse';
+			Alpine.plugin(collapse);
+			Alpine.start();
+		</script>
+	</body>
+</html>

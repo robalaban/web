@@ -1,0 +1,72 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const posts = await Promise.all(
+    Object.values(await import.meta.glob('./posts/*.md', { eager: true }))
+);
+
+const sortedPosts = posts
+    .sort((a: any, b: any) => {
+        return new Date(b.frontmatter.publishDate).getTime() -
+               new Date(a.frontmatter.publishDate).getTime();
+    });
+---
+
+<Layout>
+    <div class="grid grid-cols-1 gap-4">
+        <div class="space-y-4 mb-8">
+            <h1 class="font-mono text-2xl tracking-wide text-primary-950">
+                Robert Balaban
+            </h1>
+            <p class="font-sans text-base leading-relaxed text-primary-800">
+                Human interested in technology, music (guitar), taking photos and writing.
+            </p>
+        </div>
+
+        <section>
+            <div class="space-y-8">
+                {sortedPosts.map((post: any) => {
+                    const isWip = post.frontmatter.status === "wip";
+                    const topic = post.frontmatter.topic;
+
+                    if (isWip) {
+                        return (
+                            <div class="flex flex-col items-start">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <h2 class="text-xl text-primary-500">
+                                        {post.frontmatter.title}
+                                    </h2>
+                                    <span class="inline-flex items-center px-2 py-0.5 text-xs font-mono bg-secondary-100 text-secondary-700 rounded border border-secondary-200">
+                                        ( WIP )
+                                    </span>
+                                </div>
+                                <span class="font-mono text-sm text-primary-500 mb-2">
+                                    {topic && <>{topic} · </>}{post.frontmatter.publishDate}
+                                </span>
+                                <p class="text-sm text-primary-500">
+                                    {post.frontmatter.description}
+                                </p>
+                            </div>
+                        );
+                    } else {
+                        return (
+                            <a href={`/posts/${post.file.split('/').pop()?.split('.')[0] || ''}`} class="block">
+                                <div class="flex flex-col items-start group">
+                                    <h2 class="text-xl text-primary-950 group-hover:text-secondary-500 transition-colors mb-2">
+                                        {post.frontmatter.title}
+                                    </h2>
+                                    <span class="font-mono text-sm text-primary-500 mb-2">
+                                        {topic && <>{topic} · </>}{post.frontmatter.publishDate}
+                                    </span>
+                                    <p class="text-sm text-primary-600">
+                                        {post.frontmatter.description}
+                                    </p>
+                                </div>
+                            </a>
+                        );
+                    }
+                })}
+            </div>
+        </section>
+    </div>
+</Layout>

@@ -1,0 +1,106 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { githubRepos, kaggleNotebooks, kaggleDatasets } from '../data/projects';
+import { fetchRepos, timeAgo } from '../utils/github';
+import { fetchKaggleNotebooks, fetchKaggleDatasets } from '../utils/kaggle';
+
+const repos = await fetchRepos(githubRepos);
+const notebooks = await fetchKaggleNotebooks(kaggleNotebooks);
+const datasets = await fetchKaggleDatasets(kaggleDatasets);
+
+type ProjectItem = {
+    name: string;
+    url: string;
+    description: string;
+    updatedAt: string;
+    source: 'github' | 'kaggle-notebook' | 'kaggle-dataset';
+};
+
+const allProjects: ProjectItem[] = [
+    ...repos.map((r) => ({ ...r, source: 'github' as const })),
+    ...notebooks.map((n) => ({ ...n, source: 'kaggle-notebook' as const })),
+    ...datasets.map((d) => ({ ...d, source: 'kaggle-dataset' as const })),
+];
+
+// Sort by most recently updated
+allProjects.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+
+const iconMap = {
+    'github': 'ri-github-fill',
+    'kaggle-notebook': 'ri-file-code-line',
+    'kaggle-dataset': 'ri-database-2-line',
+};
+---
+
+<Layout title="Projects — Robert Balaban" description="Open source projects and repositories.">
+    <div class="mb-8">
+        <a href="/" class="font-mono text-sm text-primary-600 hover:text-secondary-500 transition-colors tracking-wide">
+            &larr;
+        </a>
+    </div>
+
+    <h1 class="font-mono text-2xl tracking-wide text-primary-950 mb-8">Projects</h1>
+
+    <div class="projects-table-wrapper overflow-x-auto">
+        <table class="projects-table w-full font-sans text-sm">
+            <thead>
+                <tr>
+                    <th class="text-left font-mono text-xs tracking-wide text-primary-500 uppercase px-4 py-3">
+                        Project
+                    </th>
+                    <th class="text-left font-mono text-xs tracking-wide text-primary-500 uppercase px-4 py-3">
+                        Last Updated
+                    </th>
+                </tr>
+            </thead>
+            {allProjects.map((project) => (
+                <tbody x-data={project.description ? "{ open: false }" : undefined}>
+                    <tr
+                        class:list={[
+                            "border-t border-primary-200",
+                            project.description && "cursor-pointer"
+                        ]}
+                        x-on:click={project.description ? "open = !open" : undefined}
+                    >
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-2">
+                                {project.description && (
+                                    <i
+                                        class="ri-arrow-right-s-line text-primary-400 transition-transform duration-200"
+                                        x-bind:class="open && 'rotate-90'"
+                                    ></i>
+                                )}
+                                <a href={project.url}
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="inline-flex items-center gap-2 text-secondary-600 hover:text-secondary-500 transition-colors font-medium whitespace-nowrap"
+                                   x-on:click.stop>
+                                    <i class={`${iconMap[project.source]} text-base`}></i>
+                                    {project.name}
+                                </a>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-primary-600 whitespace-nowrap">
+                            {timeAgo(project.updatedAt)}
+                        </td>
+                    </tr>
+                    {project.description && (
+                        <tr>
+                            <td colspan="2" class="p-0">
+                                <div x-show="open" x-collapse.duration.250ms class="text-primary-700 text-sm">
+                                    <div class="px-4 py-3 pl-11">
+                                        {project.description}
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    )}
+                </tbody>
+            ))}
+        </table>
+    </div>
+
+    {allProjects.length === 0 && (
+        <p class="text-primary-500 font-mono text-sm mt-4">No projects to display.</p>
+    )}
+</Layout>

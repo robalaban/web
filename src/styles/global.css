@@ -1,0 +1,210 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #f2f2f2;
+  --color-primary-100: #e6e6e6;
+  --color-primary-200: #cccccc;
+  --color-primary-300: #b3b3b3;
+  --color-primary-400: #999999;
+  --color-primary-500: #808080;
+  --color-primary-600: #666666;
+  --color-primary-700: #4d4d4d;
+  --color-primary-800: #333333;
+  --color-primary-900: #1a1a1a;
+  --color-primary-950: #000000;
+
+  --color-secondary-50: #fff1f0;
+  --color-secondary-100: #ffe4e1;
+  --color-secondary-200: #ffc7c0;
+  --color-secondary-300: #ffa094;
+  --color-secondary-400: #ff6b57;
+  --color-secondary-500: #ff1e00;
+  --color-secondary-600: #ef1900;
+  --color-secondary-700: #c61500;
+  --color-secondary-800: #9f1200;
+  --color-secondary-900: #821300;
+  --color-secondary-950: #450800;
+
+  --color-neutral-50: #ffffff;
+  --color-neutral-100: #fafafa;
+  --color-neutral-200: #f5f5f5;
+  --color-neutral-300: #f0f0f0;
+  --color-neutral-400: #dedede;
+  --color-neutral-500: #cccccc;
+  --color-neutral-600: #bababa;
+  --color-neutral-700: #a8a8a8;
+  --color-neutral-800: #969696;
+  --color-neutral-900: #848484;
+  --color-neutral-950: #737373;
+
+  --font-family-sans: 'Lora Variable', sans-serif;
+  --font-family-heading: 'Sora Variable', sans-serif;
+  --font-family-mono: 'Fira Code Variable', monospace;
+
+  --font-size-display-2xl: 4.5rem;
+  --font-size-display-xl: 3.75rem;
+  --font-size-display-lg: 3rem;
+  --font-size-display-md: 2.25rem;
+  --font-size-display-sm: 1.875rem;
+
+  --spacing-4xl: 56rem;
+  --spacing-3xl: 48rem;
+  --spacing-2xl: 42rem;
+  --spacing-xl: 36rem;
+  --spacing-lg: 32rem;
+  --spacing-md: 28rem;
+  --spacing-sm: 24rem;
+
+  --border-radius-4xl: 2rem;
+  --border-radius-3xl: 1.5rem;
+
+  --box-shadow-soft-sm: 0 2px 4px rgba(0,0,0,0.05);
+  --box-shadow-soft-md: 0 3px 6px rgba(0,0,0,0.08);
+  --box-shadow-soft-lg: 0 5px 15px rgba(0,0,0,0.08);
+  --box-shadow-soft-xl: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* Color scheme */
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --color-primary-50: #161616;
+  --color-primary-100: #1e1e1e;
+  --color-primary-200: #2d2d2d;
+  --color-primary-300: #444444;
+  --color-primary-400: #6b6b6b;
+  --color-primary-500: #808080;
+  --color-primary-600: #999999;
+  --color-primary-700: #b3b3b3;
+  --color-primary-800: #d4d4d4;
+  --color-primary-900: #e8e8e8;
+  --color-primary-950: #ececec;
+
+  --color-neutral-50: #121212;
+  --color-neutral-100: #1a1a1a;
+  --color-neutral-200: #222222;
+  --color-neutral-300: #2a2a2a;
+  --color-neutral-400: #333333;
+  --color-neutral-500: #444444;
+  --color-neutral-600: #555555;
+  --color-neutral-700: #666666;
+  --color-neutral-800: #888888;
+  --color-neutral-900: #999999;
+  --color-neutral-950: #aaaaaa;
+
+  --color-secondary-50: #1a0a09;
+  --color-secondary-100: #2d1210;
+  --color-secondary-200: #451c18;
+  --color-secondary-300: #6b2a22;
+  --color-secondary-400: #cc5542;
+  --color-secondary-500: #ff2200;
+  --color-secondary-600: #ff5540;
+  --color-secondary-700: #ff7a66;
+  --color-secondary-800: #ff9988;
+  --color-secondary-900: #ffbbaa;
+  --color-secondary-950: #ffddcc;
+
+  --box-shadow-soft-sm: 0 2px 4px rgba(0,0,0,0.2);
+  --box-shadow-soft-md: 0 3px 6px rgba(0,0,0,0.25);
+  --box-shadow-soft-lg: 0 5px 15px rgba(0,0,0,0.25);
+  --box-shadow-soft-xl: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* Custom components */
+.separator::before {
+  content: "::";
+}
+
+.prose {
+  @apply font-sans text-primary-800 leading-relaxed;
+}
+
+.prose > p {
+  @apply mb-6;
+}
+
+.prose > ul {
+  @apply mb-6 ml-6;
+}
+
+.prose > ul > li {
+  @apply mb-2 list-disc;
+}
+
+.prose > ol {
+  @apply mb-6 ml-6;
+}
+
+.prose > ol > li {
+  @apply mb-2 list-decimal;
+}
+
+.prose a {
+  @apply text-secondary-600 hover:text-secondary-500 transition-colors underline underline-offset-2;
+}
+
+.prose a[href^="http"]::after {
+  font-family: 'remixicon';
+  content: "\ecaf";
+  @apply text-[0.75em] ml-0.5 no-underline inline-block;
+}
+
+.prose > h2 {
+  @apply text-2xl font-mono text-primary-950 mt-12 mb-6;
+}
+
+.prose > h3 {
+  @apply text-xl font-mono text-primary-950 mt-8 mb-4;
+}
+
+.prose > pre {
+  @apply mb-6 p-4 rounded-lg text-sm font-mono overflow-x-auto;
+}
+
+.prose :not(pre) > code {
+  @apply font-mono text-sm px-1.5 py-0.5 rounded bg-primary-50 text-primary-800;
+}
+
+/* Projects table */
+.projects-table-wrapper {
+  @apply rounded-lg border border-primary-200;
+  box-shadow: var(--box-shadow-soft-lg);
+}
+
+.projects-table thead {
+  @apply border-b border-primary-200 bg-primary-50;
+}
+
+.projects-table thead th:first-child {
+  @apply rounded-tl-lg;
+}
+
+.projects-table thead th:last-child {
+  @apply rounded-tr-lg;
+}
+
+.projects-table tbody tr:last-child td:first-child {
+  @apply rounded-bl-lg;
+}
+
+.projects-table tbody tr:last-child td:last-child {
+  @apply rounded-br-lg;
+}
+
+.projects-table tbody tr {
+  @apply transition-colors hover:bg-primary-50;
+}
+
+/* Shiki dark theme switching */
+.dark .astro-code,
+.dark .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
