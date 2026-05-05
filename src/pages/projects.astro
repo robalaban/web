@@ -1,8 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { githubRepos, kaggleNotebooks, kaggleDatasets } from '../data/projects';
-import { fetchRepos, timeAgo } from '../utils/github';
+import { fetchRepos } from '../utils/github';
 import { fetchKaggleNotebooks, fetchKaggleDatasets } from '../utils/kaggle';
+import { timeAgo } from '../utils/time';
 
 const repos = await fetchRepos(githubRepos);
 const notebooks = await fetchKaggleNotebooks(kaggleNotebooks);
@@ -81,7 +82,9 @@ const iconMap = {
                             </div>
                         </td>
                         <td class="px-4 py-3 text-primary-600 whitespace-nowrap">
-                            {timeAgo(project.updatedAt)}
+                            <time datetime={project.updatedAt} data-relative>
+                                {timeAgo(project.updatedAt)}
+                            </time>
                         </td>
                     </tr>
                     {project.description && (
@@ -104,3 +107,11 @@ const iconMap = {
         <p class="text-primary-500 font-mono text-sm mt-4">No projects to display.</p>
     )}
 </Layout>
+
+<script>
+    import { timeAgo } from '../utils/time';
+
+    for (const el of document.querySelectorAll<HTMLTimeElement>('time[data-relative]')) {
+        if (el.dateTime) el.textContent = timeAgo(el.dateTime);
+    }
+</script>
